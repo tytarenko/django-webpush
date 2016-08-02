@@ -1,3 +1,4 @@
+import json
 from .models import PushInformation, Group
 
 from django.conf import settings
@@ -32,6 +33,7 @@ def _send_notification(push_info, payload, ttl):
     req = WebPusher(subscription_data).send(data=payload, ttl=ttl, gcm_key=gcm_key)
     return req
 
+
 def _process_subscription_info(subscription):
     subscription_data = model_to_dict(subscription, exclude=["browser", "id"])
     endpoint = subscription_data.pop("endpoint")
@@ -42,3 +44,13 @@ def _process_subscription_info(subscription):
         "endpoint": endpoint,
         "keys": {"p256dh": p256dh, "auth": auth}
     }
+
+
+def send_group_notification(group_name, payload, ttl=0):
+    payload = json.dumps(payload)
+    send_notification_to_group(group_name, payload, ttl)
+
+
+def send_user_notification(user, payload, ttl=0):
+    payload = json.dumps(payload)
+    send_notification_to_user(user, payload, ttl)
