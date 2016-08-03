@@ -6,11 +6,7 @@ var registration;
 if (webpushNeedSubscribe) {
     window.addEventListener('load', webpushSubscribe )
 }
-//window.addEventListener('load', function() {
-//    var subBtn = document.getElementById('webpush-subscribe-button');
-//    subBtn.addEventListener('click', webpushSubscribe);
-//});
-//
+
 function webpushSubscribe() {
 
       // Do everything if the Browser Supports Service Worker
