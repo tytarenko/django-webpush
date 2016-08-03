@@ -3,15 +3,15 @@ from .models import Group, PushInformation, SubscriptionInfo
 
 
 class GroupAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'name', )
 
 
 class PushInformationAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'user', )
 
 
 class SubscriptionInfoAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'browser', )
 
 admin.site.register(Group, GroupAdmin)
 admin.site.register(PushInformation, PushInformationAdmin)
