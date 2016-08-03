@@ -1,91 +1,110 @@
 // Based On https://github.com/chrisdavidmills/push-api-demo/blob/283df97baf49a9e67705ed08354238b83ba7e9d3/main.js
 
-var isPushEnabled = false;
 var registration;
 
 
 if (webpushNeedSubscribe) {
-    window.addEventListener('load', function() {
-          if (isPushEnabled) {
-            return unsubscribe()
-          }
+    window.addEventListener('load', webpushSubscribe )
+}
+//window.addEventListener('load', function() {
+//    var subBtn = document.getElementById('webpush-subscribe-button');
+//    subBtn.addEventListener('click', webpushSubscribe);
+//});
+//
+function webpushSubscribe() {
 
-          // Do everything if the Browser Supports Service Worker
-          if ('serviceWorker' in navigator) {
-            var serviceWorker = document.getElementById('service-worker-js').src;
-            navigator.serviceWorker.register(serviceWorker)
-              .then(
-                function(reg) {
-                  console.log('Loading....');
-                  registration = reg;
-                  initialiseState(reg);
-                }
-              );
-          }
-
-          // Once the service worker is registered set the initial state
-          function initialiseState(reg) {
-            // Are Notifications supported in the service worker?
-            if (!(reg.showNotification)) {
-                // Show a message and activate the button
-                console.log('Showing Notification is not suppoted in your browser');
-                console.log('Subscribe to Push Messaging');
-                return;
+      // Do everything if the Browser Supports Service Worker
+      if ('serviceWorker' in navigator) {
+        var serviceWorker = document.getElementById('service-worker-js').src;
+        navigator.serviceWorker.register(serviceWorker)
+          .then(
+            function(reg) {
+              registration = reg;
+              initialiseState(reg);
             }
-
-            // Check the current Notification permission.
-            // If its denied, it's a permanent block until the
-            // user changes the permission
-            if (Notification.permission === 'denied') {
-              // Show a message and activate the button
-              console.log('The Push Notification is blocked from your browser.');
-              console.log('Subscribe to Push Messaging');
-              return;
-            }
-
-            // Check if push messaging is supported
-            if (!('PushManager' in window)) {
-              // Show a message and activate the button
-              console.log('Push Notification is not available in the browser');
-              console.log('Subscribe to Push Messaging');
-              return;
-            }
-
-            // We need to subscribe for push notification and send the information to server
-            subscribe(reg)
-          }
-        }
-    )
+          );
+      }
 }
 
+// Once the service worker is registered set the initial state
+function initialiseState(reg) {
+    // Are Notifications supported in the service worker?
+    if (!(reg.showNotification)) {
+        // Show a message and activate the button
+        console.log('Showing Notification is not suppoted in your browser');
+        console.log('Subscribe to Push Messaging');
+        return;
+    }
+
+    // Check the current Notification permission.
+    // If its denied, it's a permanent block until the
+    // user changes the permission
+    if (Notification.permission === 'denied') {
+      // Show a message and activate the button
+      console.log('The Push Notification is blocked from your browser.');
+      console.log('Subscribe to Push Messaging');
+      return;
+    }
+
+    // Check if push messaging is supported
+    if (!('PushManager' in window)) {
+      // Show a message and activate the button
+      console.log('Push Notification is not available in the browser');
+      console.log('Subscribe to Push Messaging');
+      return;
+    }
+
+    // We need to subscribe for push notification and send the information to server
+    subscribe(reg)
+}
 
 function subscribe(reg) {
-  // Get the Subscription or register one
-  getSubscription(reg)
+    // Get the Subscription or register one
+    getSubscription(reg)
     .then(
-      function(subscription) {
-        postSubscribeObj('subscribe', subscription);
-      }
+        function(subscription) {
+            console.log('subscribe')
+            console.log(subscription)
+            postSubscribeObj('subscribe', subscription);
+        }
     )
     .catch(
-      function(error) {
-        console.log('error')
-      }
+        function(error) {
+            console.log('error');
+            console.log(error);
+        }
     );
 }
 
 function getSubscription(reg) {
     return reg.pushManager.getSubscription()
-      .then(
+    .then(
         function(subscription) {
-          // Check if Subscription is available
-          if (subscription) {
-            return subscription;
-          }
-          // If not, register one
-          return registration.pushManager.subscribe({ userVisibleOnly: true });
+            // Check if Subscription is available
+            if (subscription) {
+                 return subscription;
+            }
+            // If not, register one
+            return registration.pushManager.subscribe({ userVisibleOnly: true });
         }
-      )
+    )
+}
+
+function unsubscribe() {
+  // Get the Subscription to unregister
+  registration.pushManager.getSubscription()
+    .then(
+      function(subscription) {
+        // Check we have a subscription to unsubscribe
+        if (!subscription) {
+          // No subscription object, so set the state
+          // to allow the user to subscribe to push
+          console.log('Subscription is not available');          
+          return;
+        }
+        postSubscribeObj('unsubscribe', subscription);
+      }
+    )  
 }
 
 function postSubscribeObj(statusType, subscription) {
